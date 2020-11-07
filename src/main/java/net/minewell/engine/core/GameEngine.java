@@ -1,12 +1,14 @@
 package net.minewell.engine.core;
 
+import net.minewell.engine.utils.TimeUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class GameEngine implements Runnable {
 
-    public static final int TARGET_FPS = 75;
-    public static final int TARGET_UPS = 30;
+    public static final Logger LOGGER = LogManager.getLogger("MineWell");
 
     private final Window window;
-    //private final Timer timer;
     private final IGameLogic gameLogic;
 
     private final Thread gameLoopThread;
@@ -15,7 +17,10 @@ public class GameEngine implements Runnable {
         this.gameLoopThread = new Thread(this, "GAME_LOOP_THREAD");
         this.window = new Window(windowTitle, width, height, vSync);
         this.gameLogic = gameLogic;
-        //this.timer = new Timer();
+    }
+
+    public void start() {
+        this.gameLoopThread.start();
     }
 
     @Override
@@ -25,20 +30,43 @@ public class GameEngine implements Runnable {
             gameLoop();
         } catch (Exception exception) {
             exception.printStackTrace();
+            LOGGER.fatal(exception.getMessage());
+        } finally {
+            dispose();
         }
     }
 
     protected void init() throws Exception {
-        window.init();
-        //timer.init()
-        gameLogic.init();
+        this.window.init();
+        this.gameLogic.init();
+    }
+
+    protected void input() {
+        this.gameLogic.input(this.window);
+    }
+
+    protected void update(double deltaTime) {
+        this.gameLogic.update(deltaTime);
+        this.window.update();
+    }
+
+    protected void render() {
+        this.gameLogic.render(this.window);
     }
 
     protected void gameLoop() {
         boolean running = true;
-        while (running && !window.windowShouldClose()) {
-
+        double prevTime = TimeUtils.getTime();
+        while (running && !this.window.windowShouldClose()) {
+            input();
+            update(TimeUtils.getTime() - prevTime);
+            render();
+            prevTime = TimeUtils.getTime();
         }
+    }
+
+    protected void dispose() {
+        this.gameLogic.dispose();
     }
 
 }

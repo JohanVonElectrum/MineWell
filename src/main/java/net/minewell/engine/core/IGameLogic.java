@@ -6,8 +6,10 @@ public interface IGameLogic {
 
     void input(Window window);
 
-    void update(float interval);
+    void update(double deltaTime);
 
     void render(Window window);
+
+    void dispose();
 
 }

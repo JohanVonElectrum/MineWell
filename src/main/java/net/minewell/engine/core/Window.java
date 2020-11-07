@@ -1,12 +1,13 @@
 package net.minewell.engine.core;
 
 import static org.lwjgl.glfw.GLFW.*;
+
+import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
-import static org.lwjgl.opengl.GL11.GL_FALSE;
-import static org.lwjgl.opengl.GL11.GL_TRUE;
-import static org.lwjgl.opengl.GL11.glClearColor;
+
+import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class Window {
@@ -30,14 +31,15 @@ public class Window {
     }
 
     public void init() {
+        System.out.println("LWJGL " + Version.getVersion());
+
         // Setup an error callback. The default implementation
         // will print the error message in System.err.
         GLFWErrorCallback.createPrint(System.err).set();
 
         // Initialize GLFW. Most GLFW functions will not work before doing this.
-        if (!glfwInit()) {
+        if (!glfwInit())
             throw new IllegalStateException("Unable to initialize GLFW");
-        }
 
         glfwDefaultWindowHints(); // optional, the current window hints are already the default
         glfwWindowHint(GLFW_VISIBLE, GL_FALSE); // the window will stay hidden after creation
@@ -48,10 +50,9 @@ public class Window {
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
         // Create the window
-        windowHandle = glfwCreateWindow(width, height, title, NULL, NULL);
-        if (windowHandle == NULL) {
+        this.windowHandle = glfwCreateWindow(this.width, this.height, this.title, NULL, NULL);
+        if (this.windowHandle == NULL)
             throw new RuntimeException("Failed to create the GLFW window");
-        }
 
         // Setup resize callback
         glfwSetFramebufferSizeCallback(windowHandle, (window, width, height) -> {
@@ -61,7 +62,7 @@ public class Window {
         });
 
         // Setup a key callback. It will be called every time a key is pressed, repeated or released.
-        glfwSetKeyCallback(windowHandle, (window, key, scancode, action, mods) -> {
+        glfwSetKeyCallback(this.windowHandle, (window, key, scancode, action, mods) -> {
             if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
                 glfwSetWindowShouldClose(window, true); // We will detect this in the rendering loop
             }
@@ -79,15 +80,15 @@ public class Window {
         // Make the OpenGL context current
         glfwMakeContextCurrent(this.windowHandle);
 
-        if (isvSync()) {
-            // Enable v-sync
+        // Enable v-sync
+        if (isvSync())
             glfwSwapInterval(1);
-        }
 
         // Make the window visible
         glfwShowWindow(this.windowHandle);
 
         GL.createCapabilities();
+        System.out.println("OpenGL " + glGetString(GL_VERSION));
 
         // Set the clear color
         setClearColor(0.0f, 0.0f, 0.0f, 0.0f);
