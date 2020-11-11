@@ -1,7 +1,12 @@
 package net.minewell.engine.core;
 
 import net.minewell.engine.exceptions.ShaderException;
-import org.lwjgl.opengl.GL20;
+import org.joml.Matrix4f;
+import org.lwjgl.system.MemoryStack;
+
+import java.nio.FloatBuffer;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.lwjgl.opengl.GL20.*;
 
@@ -12,17 +17,21 @@ public class ShaderProgram {
     private Shader vertexShader;
     private Shader fragmentShader;
 
+    private final Map<String, Integer> uniforms;
+
     public ShaderProgram(Shader vertexShader, Shader fragmentShader) throws ShaderException {
         this.vertexShader = vertexShader;
         this.fragmentShader = fragmentShader;
 
         this.id = createProgram();
+
+        this.uniforms = new HashMap<>();
     }
 
     public int createProgram() throws ShaderException {
         int id = glCreateProgram();
         if (id == GL_FALSE)
-            throw new ShaderException("Could not create ShaderProgram!");
+            throw new ShaderException("Could not create ShaderProgram");
 
         this.vertexShader.attach(id);
         this.fragmentShader.attach(id);
@@ -57,6 +66,26 @@ public class ShaderProgram {
         unbind();
         if (this.id != GL_FALSE)
             glDeleteProgram(this.id);
+    }
+
+    // Uniforms
+
+    public void createUniform(String uniformName) throws ShaderException {
+        int uniformLocation = glGetUniformLocation(this.id, uniformName);
+
+        if (uniformLocation < 0)
+            throw new ShaderException("Could not find uniform:" + uniformName);
+
+        uniforms.put(uniformName, uniformLocation);
+    }
+
+    public void setUniform(String uniformName, Matrix4f value) {
+        // Dump the matrix into a float buffer
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            FloatBuffer buffer = stack.mallocFloat(16);
+            value.get(buffer);
+            glUniformMatrix4fv(this.uniforms.get(uniformName), false, buffer);
+        }
     }
 
 }

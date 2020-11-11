@@ -92,6 +92,8 @@ public class Window {
 
         // Set the clear color
         setClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+        glEnable(GL_DEPTH_TEST);
     }
 
     /**

@@ -24,7 +24,7 @@ public class Shader {
     protected int createShader(String source, int type) throws ShaderException {
         int id = glCreateShader(type);
         if (id == GL_FALSE)
-            throw new ShaderException("Could not create shader!");
+            throw new ShaderException("Could not create shader");
 
         glShaderSource(id, source);
         glCompileShader(id);

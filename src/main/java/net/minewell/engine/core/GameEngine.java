@@ -38,7 +38,7 @@ public class GameEngine implements Runnable {
 
     protected void init() throws Exception {
         this.window.init();
-        this.gameLogic.init();
+        this.gameLogic.init(window);
     }
 
     protected void input() {
